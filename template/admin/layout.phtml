@@ -1,0 +1,151 @@
+<?php
+ob_start();
+?>
+<div id="kb-amz-admin" class="<?php echo $this->bodyClass; ?>">
+    <?php
+    $params = array();
+    $params['page'] = $_GET['page'];
+    ?>
+    <div id="kb-amz-header">
+        <?php ob_start(); ?>
+        <nav class="navbar navbar-default">
+            <ul class="nav navbar-nav">
+            <?php
+                $query = array(
+                    'page' => $_GET['page'],
+                    'kbAction' => isset($_GET['kbAction']) ? $_GET['kbAction'] : 'home'
+                );
+                $i = 0;
+                foreach($this->actions as $action):
+                    if (isset($action['pages'])) {
+                        $isActive = false;
+                        $subMenuStr = '';
+                        foreach ($action['pages'] as $page) {
+                            $subPageAction = false;
+                            if (isset($_GET['kbAction']) && $_GET['kbAction'] == $page['action']) {
+                                $isActive = $subPageAction = true;
+                            } 
+                            $subMenuStr .= sprintf(
+                                '<li class="%s"><a href="?%s">%s</a></li>',
+                                $subPageAction ? 'active' : '',
+                                http_build_query(array_merge($query, array('kbAction' => $page['action']))),
+                                $page['label']
+                            );
+                        }
+
+                        echo sprintf(
+                            '<li class="dropdown %s"><a class="dropdown-toggle" data-toggle="dropdown" href="#">%s %s <span class="caret"></span></a><ul class="dropdown-menu">%s</ul></li>',
+                            $isActive ? 'active' : '',
+                            (isset($action['icon']) ? '<span class="glyphicon '.$action['icon'].'"></span>' : ''),
+                            $action['label'],
+                            $subMenuStr
+                        );
+                    } else {
+                        $isActive = false;
+                        if (isset($_GET['kbAction']) && $_GET['kbAction'] == $action['action']) {
+                            $isActive= true;
+                        } else if (!isset($_GET['kbAction']) && ++$i == 1) {
+                            $isActive= true;
+                        }
+                        echo sprintf(
+                            '<li class="%s"><a href="?%s">%s %s</a></li>',
+                            $isActive ? 'active' : '',
+                            http_build_query(array_merge($query, array('kbAction' => $action['action']))),
+                            (isset($action['icon']) ? '<span class="glyphicon '.$action['icon'].'"></span>' : ''),
+                            $action['label']
+                        );
+                    }
+                endforeach;
+            ?>
+            </ul>
+        </nav>
+        <?php echo apply_filters('kbAmzLayoutNavigation', ob_get_clean()); ?>
+    </div>
+
+    <div id="kb-amz-content">
+        <?php
+        if (!empty($this->messages)) {
+            foreach ($this->messages as $m) {
+                echo kbAmzAdminMessage($m[0], $m[1]);
+            }
+        }
+        if (isset($_GET['messages']) && is_array($_GET['messages'])) {
+            foreach ($_GET['messages'] as $type => $messages) {
+                if (!is_array($messages)) {
+                    $messages = array($messages);
+                }
+                foreach ($messages as $message) {
+                    echo kbAmzAdminMessage($message, $type);
+                }
+            }
+        }
+        ?>
+        <?php echo $this->getContent(); ?>
+    </div>
+    <hr/>
+    <div id="kb-amz-footer">
+        <div>
+            Support Id - <?php echo getKbAmz()->getStoreId(); ?>
+        </div>
+        <div class="credit">
+            2014 - <?php echo date('Y'); ?> <a href="http://www.2kblater.com?click=<?php echo getKbHostname();?>" title="Web & Software Development">2kblater.com</a> Consultations, Web & Software Development
+        </div>
+    </div>
+</div>
+<script>
+    (function ($, params) {
+        $.each(params, function (name, value) {
+            $('[name="'+name+'"]').val(value);
+        });
+    })(jQuery, <?php echo json_encode($_GET); ?>);
+</script>
+
+<script>
+    (function($, url) {
+        $(function(){
+            $('body').on('click', '[data-option]', function () {
+                $.ajax({
+                    type: "POST",
+                    url : url,
+                    data: {
+                        'action' : 'kbAmzSetOption',
+                        'option' : $(this).attr('data-option'),
+                        'option-value' : $(this).attr('data-option-value'),
+                    }
+                }).done(function(data) {
+                    
+                }).error(function(){
+                    alert('Unable to connect to the server. Please try again.');
+                });
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+            $('.nav-tabs > a').click(function (e) {
+              e.preventDefault();
+              $(this).tab('show');
+            });
+        });
+    })(jQuery, '<?php echo getKbAmzAjaxUrl(); ?>');
+</script>
+
+
+<?php if (getKbAmz()->getOption('sendStatsData')): ?>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.go'+'og'+'le-ana'+'lyt'+'ics.com/ana'+'lytics.js','g'+'a');
+
+  ga('create', 'UA-33689676-9', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<?php endif; ?>
+
+<?php
+$content = ob_get_clean();
+$filtered = apply_filters('KbAmzViewLayout', $content);
+if (strlen($content) > strlen($filtered)) {
+    $filtered = $content;
+}
+echo $filtered;
+?>

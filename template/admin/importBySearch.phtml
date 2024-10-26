@@ -1,0 +1,71 @@
+<form role="form" method="get">
+    <?php echo kbAmzHiddenInput(); ?>
+    <div class="alert alert-success">Use Category from the select or write down your own. <a href="http://docs.aws.amazon.com/AWSECommerceService/latest/DG/BrowseNodeIDs.html" target="_blank">Check this link for amazon categories</a></div>
+    <div class="row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="search" class="control-label">
+                    <?php echo __('Search Word'); ?>
+                </label>
+                <input value="<?php echo getKbPostVar('search');?>" type="text" name="search" class="form-control" placeholder="<?php echo __('e.g. iphone'); ?>">
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="category" class="control-label">
+                    <?php echo __('Select Category'); ?>
+                </label>
+                <select name="category" class="form-control"  value="<?php echo getKbPostVar('category');?>">
+                    <?php echo kbAmzSelect($this->categories, getKbPostVar('category'), null); ?>
+                </select>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="categoryName" class="control-label">
+                    <?php echo __('Or Write a Category Name'); ?>
+                </label>
+                <input type="text" name="categoryName" class="form-control" value="<?php echo getKbPostVar('categoryName');?>" />
+            </div>
+        </div>
+<!--        <div class="col-xs-3">
+            <div class="form-group">
+                <label for="category" class="control-label">
+                    <?php echo __('Limit'); ?>
+                </label>
+                <select name="category" class="form-control"  value="<?php echo getKbPostVar('category');?>">
+                    <?php echo kbAmzSelect(array(10 => 10, 20 => 20, 30 => 30), getKbPostVar('category'), null); ?>
+                </select>
+            </div>
+        </div>-->
+        
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" name="submit" value="load"><?php echo __('Search'); ?></button>
+    </div>
+</form>
+
+<?php
+if ($this->resultSet) {
+    echo '<div class="form-group">';
+    echo sprintf(
+        '<span class="label label-default">%s %s %s %s %s</span>',
+        $this->resultSet->getTotalResults(),
+        __('Items'),
+        __('in'),
+        $this->resultSet->getTotalPages(),
+        __('Pages')
+    );
+    echo sprintf(
+        '&nbsp;<span class="label label-info">%s</span>',
+        __('Amazon is allowing to browse up to 10 pages of results.')
+    );
+    echo '</div>';
+}
+?>
+
+<?php
+if ($this->addItemsTemplate) {
+    include $this->addItemsTemplate.'.phtml';
+}
+?>

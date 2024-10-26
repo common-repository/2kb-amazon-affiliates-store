@@ -1,0 +1,349 @@
+<?php if (getKbAmz()->getOption('showStatsDataJoinModal')) : ?>
+    <div class="alert alert-success" role="alert">
+        <?php echo __('Do you want to participate in <b>Improving Plugin Experience Program</b> by Sending Us Data?'); ?>
+        <br/>
+        <?php echo __('You can turn this option off at any time from the setting menu.'); ?>
+        <br/>
+        <?php
+        $_GET['improvePluginExperience'] = 1;
+        unset($_GET['kbAction']);
+        $_GET['kbAction'] = 'improve';
+        ?>
+        <a href="?<?php echo http_build_query($_GET); ?>" class="btn btn-primary">Yes</a>
+        <?php
+        $_GET['improvePluginExperience'] = 0;
+        ?>
+        <a href="?<?php echo http_build_query($_GET); ?>" class="btn btn-default">No</a>
+        <?php
+        unset($_GET['improvePluginExperience']);
+        ?>
+    </div>
+<?php endif; ?>
+
+
+<?php if (!getKbAmz()->getOption('KbAmzV2RateUs')) : ?>
+    <div class="alert alert-warning" role="alert">
+        <button aria-label="Close" data-dismiss="alert" class="close" type="button" data-option="KbAmzV2RateUs" data-option-value="1"><span aria-hidden="true">×</span></button>
+        <span class="label label-success"><span aria-hidden="true" class="glyphicon glyphicon-heart"></span></span>
+        2kb Amazon Affiliate Store Plugin Team, worked hard to bring you many new features in v2 of the plugin.
+        We want to ask you to add a quick review of our work on <a href="https://wordpress.org/plugins/2kb-amazon-affiliates-store/">https://wordpress.org/plugins/2kb-amazon-affiliates-store/</a>
+        
+    </div>
+<?php endif; ?>
+
+<?php if (!getKbAmz()->getOption('KbAmzV2VariantsMessageSeen')) : ?>
+    <div class="alert alert-warning" role="alert">
+        <button aria-label="Close" data-dismiss="alert" class="close" type="button" data-option="KbAmzV2VariantsMessageSeen" data-option-value="1"><span aria-hidden="true">×</span></button>
+        <span class="label label-success">NEW</span>
+        Product Variants and Versions are added. Take a look before you activate them!
+        <b><a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'info')))?>#variants">Check the docs</a></b>
+    </div>
+<?php endif; ?>
+
+<?php if (!getKbAmz()->getOption('AttributesCountMessageSeen') && count(getKbAmz()->getOption('productAttributes')) < 5) : ?>
+    <div class="alert alert-warning" role="alert">
+        <button aria-label="Close" data-dismiss="alert" class="close" type="button" data-option="AttributesCountMessageSeen" data-option-value="1"><span aria-hidden="true">×</span></button>
+        Your products show only
+        <?php
+        $count = count(getKbAmz()->getOption('productAttributes'));
+        echo sprintf(
+            '%s %s.',
+            $count,
+            $count == 1 ? 'Attribute' : 'Attributes'
+        );
+        ?>
+        Consider adding more attributes for better selling performance.
+        <b><a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'productsAttributes')))?>">Add more attributes</a></b>
+    </div>
+<?php endif; ?>
+
+
+<div class="row homepage">
+    <div class="col-sm-3">
+        <img src="<?php echo getKbPluginUrl(); ?>/template/admin/img/2kb-amazon-affiliate-product-logo.png" />
+    </div>
+    <div class="col-sm-9">
+        <div class="row">
+            <div class="col-sm-12" style="font-size: 16px;">
+                <div>
+                    <span class="label label-primary" title="Products" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-usd"></span>
+                        <?php echo getKbAmz()->getProductsCount(); ?>
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Products to download" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-download-alt"></span>
+                        <?php echo getKbAmz()->getProductsToDownloadCount(); ?>
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Products to update" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                        <?php echo getKbAmz()->getProductsToUpdateCount(); ?>
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Products with no quantity" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-flag"></span>
+                        <?php echo getKbAmz()->getProductsWithNoQuantity(true); ?>
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Time to update" data-toggle="tooltip" data-placement="top">
+                        <?php
+                        $hours = 0;
+                        $count = getKbAmz()->getProductsToUpdateCount();
+                        if ($count > 0) {
+                            $per = getKbAmz()->getOption('updateProductsPriceCronNumberToProcess');
+                            $interval = getKbAmz()->getOption('updateProductsPriceCronInterval');
+                            $intervals = 0;
+                            if ($per) {
+                                $intervals = $count / $per;
+                            }
+                            $intervalHours = 1;
+                            if ($interval == 'twicedaily') {
+                                $intervalHours = 12;
+                            } else if ($interval == 'daily') {
+                                $intervalHours = 24;
+                            }
+                            $hours = ceil($intervals . $intervalHours);
+                        }
+
+                        ?>
+                        <span class="glyphicon glyphicon-time"></span>
+                        <?php echo $hours; ?>h
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Requests/Avg. Time" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-signal"></span>
+                        <?php echo getKbAmz()->getOption('AmazonRequests', 1); ?>
+                        /
+                        <?php echo getKbAmz()->getOption('averageTimeToFetch', 1) * 1000; ?>ms
+                    </span>
+                    &nbsp;
+                    <span class="label label-primary" title="Cron last run" data-toggle="tooltip" data-placement="top">
+                        <span class="glyphicon glyphicon-time"></span>
+                        <?php echo getKbAmz()->getOption('LastCronRun', '-'); ?>
+                    </span>
+                    &nbsp;
+                    <div title="Amazon Sync Health" data-toggle="tooltip" data-placement="top" style="width: 100px;display: inline-block;margin-bottom: 0px;vertical-align: middle;">
+                        <?php echo getKbAmzStoreHealthHtml();?>
+                    </div>
+                </div>
+                <br/>
+            </div>
+            <div class="col-sm-6">
+                <?php if (hasKbAmazonApiDetails()) { ?>
+                    <div class="alert alert-success">
+                        <span class="glyphicon glyphicon-check"></span>
+                        <?php echo __('Amazon API is Configured.'); ?>
+                    </div>
+                <?php } else { ?>
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-fire"></span>
+                        <a href="?page=kbAmz&kbAction=settingsAmazonApi">
+                            <?php echo __('Click to setup you Amazon API Configuration. <b>FIST TIME USERS - START FROM HERE</b>'); ?>
+                        </a>
+                    </div>
+                    <?php
+                }
+                ?>
+
+                <?php if (getKbAmz()->getProductsCount()) { ?>
+
+                    <?php
+                    $count = getKbAmz()->getProductsCount();
+                    $publishedCount = getKbAmz()->getPublishedProductsCount();
+                    $max = getKbAmz()->getOption('maxProductsCount');
+                    ?>
+
+                    <?php if ($max > $count && $count > $max * 0.8) { ?>
+                        <div class="alert alert-warning">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <?php echo sprintf(__('You have %s of %s products.'), $count, getKbAmz()->getOption('maxProductsCount')); ?>
+                        </div>
+                    <?php } else if ($count < $max) { ?>
+                        <div class="alert alert-success">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <?php echo sprintf(__('You have %s of %s products.'), $count, getKbAmz()->getOption('maxProductsCount')); ?>
+                        </div>
+                        <?php
+                    } else {
+                        ?>
+                        <div class="alert alert-danger">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <?php
+                            $params = $_GET;
+                            $params['kbAction'] = 'premium';
+                            echo sprintf(
+                                    __('You have %s of %s products. You can upgrade from <a href="?%s">here</a>.'), $count, getKbAmz()->getOption('maxProductsCount'), http_build_query($params)
+                            );
+                            ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                    <?php if ($publishedCount == 0): ?>
+                        <div class="alert alert-danger">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <?php
+                            $params = $_GET;
+                            $params['kbAction'] = 'productsVisibility';
+                            echo sprintf(
+                                __('You have 0 of %s published products. Recommended action <a href="?%s">publish</a>.'),
+                                $count,
+                                http_build_query($params)
+                            );
+                            ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-success">
+                            <span class="glyphicon glyphicon-check"></span>
+                            <?php echo sprintf(__('You have %s of %s published products.'),
+                                $publishedCount,
+                                $count); ?>
+                        </div>
+                    <?php endif; ?>
+                <?php } else { ?>
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-fire"></span>
+                        <a href="?page=kbAmz&kbAction=importBySearch">
+                            <?php echo __('You have no products imported. Click here to start importing Amazon Products.'); ?>
+                        </a>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+
+            <div class="col-sm-6">
+                <?php if (extension_loaded('soap')) { ?>
+                    <div class="alert alert-success">
+                        <span class="glyphicon glyphicon-check"></span>
+                        <?php echo __('SOAP extension is activated on this server.'); ?>
+                    </div>
+                <?php } else { ?>
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-fire"></span>
+                        <?php echo __('SOAP extension is not activated for this server. Please contact your hosting company and request activation.'); ?>
+                    </div>
+                    <?php
+                }
+                if (function_exists('curl_init')) {
+                    ?>
+                    <div class="alert alert-success">
+                        <span class="glyphicon glyphicon-check"></span>
+                        <?php echo __('cURL extension is activated for this server.'); ?>
+                    </div>
+                    <?php
+                } else {
+                    ?>
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-fire"></span>
+                        <?php echo __('cURL extension is not activated for this server. Please contact your hosting company and request activation.'); ?>
+                    </div>
+                    <?php
+                }
+
+                if ((int) ini_get('allow_url_fopen') > 0) {
+                    ?>
+                    <div class="alert alert-success">
+                        <span class="glyphicon glyphicon-check"></span>
+                        <?php echo __('allow_url_fopen is enabled. This option allows product`s images download.'); ?>
+                    </div>
+                    <?php
+                } else {
+                    ?>
+                    <div class="alert alert-danger">
+                        <span class="glyphicon glyphicon-fire"></span>
+                        <?php echo __('allow_url_fopen is disabled. This option allows product`s images download. Please contact your hosting company and request activation.'); ?>
+                    </div>
+                <?php }
+                ?>
+            </div>
+            
+            <?php if (!getKbAmz()->getOption('allowVariants') && getKbAmz()->getProductVariantsCount()) :?>
+            <div class="col-sm-6">
+                <div class="alert alert-warning">
+                    <?php echo sprintf(__('You have %s product varants but disallowed importing them.'),getKbAmz()->getProductVariantsCount()); ?>
+                    <a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'settingsGeneral'))); ?>"><?php echo __('Check your settings.');?></a>
+                </div>
+            </div>
+            <?php endif;?>
+            
+            
+<!--            <div class="col-sm-12">
+                <div role="alert" class="alert alert-info">
+                    <strong>Heads up!</strong> This alert needs your attention, but it's not super important.
+                </div>
+            </div>-->
+        </div>
+        <?php
+        $tips = array();
+        if (getKbAmz()->getOption('downloadImages')) {
+            $tips[] = 'Did you know that you can skip downloading amazon images on your disk? Go to <a href="?'.http_build_query(array_merge($_GET, array('kbAction' => 'settingsGeneral'))).'">General Settings</a> and set No to Download images from Amazon.';
+        }
+        
+        $tips[] = 'Did you know that you can check the values of all product attributes from <a href="?'.http_build_query(array_merge($_GET, array('kbAction' => 'productsExplodeAttributes'))).'">Explore Attributes</a>.';
+        $tips[] = 'Every variant is inserted as new post (the same as none variable products). Product with 3 Sizes and 8 Colors will result in inserting 25 posts.(1st the main product and 3x8 Variants)';
+        $tips[] = 'From where to get ASIN. <a href="?'.http_build_query(array_merge($_GET, array('kbAction' => 'info'))).'#get-asin">Click here to find</a>.';
+        ?>
+        
+        <?php if (count(getKbAmz()->getOption('productAttributes')) < 5) : ?>
+            <?php ob_start();?>
+            Your products show only
+            <?php
+            $count = count(getKbAmz()->getOption('productAttributes'));
+            echo sprintf(
+                '%s %s.',
+                $count,
+                $count == 1 ? 'Attribute' : 'Attributes'
+            );
+            ?>
+            Consider adding more attributes for better selling performance.
+            <b><a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'productsAttributes')))?>">Add more attributes</a></b>
+            <?php
+            $tips[] = ob_get_clean();
+            ?>
+        <?php endif; ?>
+
+        
+        <?php
+        if (!empty($tips)) {
+            $tip = $tips[rand(0, count($tips) - 1)];
+            echo '<div class="alert alert-info" role="alert"><span aria-hidden="true" class="glyphicon glyphicon-heart-empty"></span> '.$tip.'</div>';
+        }
+        ?>
+        <div class="icons-actions">
+<!--            <a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'createStorePage')));?>" class="btn btn-default">
+                <span aria-hidden="true" class="glyphicon glyphicon-home" style="font-size: 50px;display: block;"></span>
+                Create Store Page
+            </a>
+            &nbsp;-->
+            <?php
+            $siteNetwork = getKbAmz()->getOption('siteNetwork');
+            $joined      = isset($siteNetwork['siteActive']) && $siteNetwork['siteActive'];
+            ?>
+            <a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'network')));?>" class="btn btn-default" title="<?php echo !$joined ? 'Join to 2kb Amazon Network' : 'Joined to 2kb Amazon Network';?>" data-toggle="tooltip" data-placement="bottom">
+                <span aria-hidden="true" class="glyphicon glyphicon-globe" style="font-size: 50px;display: block;"></span>
+                2kb Amazon Network<br/>(beta, tests only)
+                <?php
+                echo sprintf(
+                    '<span class="kb-amz-icon-action-dot %s">&nbsp;</span>',
+                    $joined ? 'active' : 'not-active'
+                );
+                ?>
+            </a>
+            <?php
+            $count = getKbAmz()->getProductsCount();
+            ?>
+            <a href="?<?php echo http_build_query(array_merge($_GET, array('kbAction' => 'examples')));?>" class="btn btn-default" title="<?php echo $count ? 'How to user your store the best way.' : 'Import some products before using the examples.';?>" data-toggle="tooltip" data-placement="bottom">
+                <span aria-hidden="true" class="glyphicon glyphicon-book" style="font-size: 50px;display: block;"></span>
+                Examples<br/>Use your store smart!
+                <?php
+                echo sprintf(
+                    '<span class="kb-amz-icon-action-dot %s">&nbsp;</span>',
+                    $count ? 'active' : 'not-active'
+                );
+                ?>
+            </a>
+        </div>
+    </div>
+</div>

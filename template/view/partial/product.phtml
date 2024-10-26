@@ -1,0 +1,87 @@
+<?php
+
+$meta = getKbAmz()->getProductMeta($p->ID);
+$title = htmlentities(str_replace('"', '', get_the_title($p->ID)));
+$c = $this->items_per_row ? $this->items_per_row : getKbAmz()->getOption('ListItemsPerRow', 6);
+$lg = 2;
+$md = 2;
+$sm = 6;
+$xs = 6;
+if ($c == 4) {
+    $lg = 3;
+    $md = 3;
+    $sm = 6;
+    $xs = 6;
+} else if($c == 3) {
+    $lg = 4;
+    $md = 4;
+    $sm = 6;
+    $xs = 6;
+} else if ($c == 2) {
+    $lg = 6;
+    $md = 6;
+    $sm = 6;
+    $xs = 6;
+};
+?>
+
+<li class="kb-amz-per-row-<?php echo $c; ?> col-lg-<?php echo $lg; ?> col-md-<?php echo $md; ?> col-sm-<?php echo $sm; ?> col-xs-<?php echo $xs; ?> kb-amz-row-item-part <?php echo 'kb-amz-' . getKbAmz()->getOption('productListImageSize'); ?> <?php echo $this->featured ? 'featured' : 'not-featured'; ?>">
+    <article id="post-<?php echo $p->ID; ?>" <?php post_class('kb-amz-product', $p->ID); ?>>
+        <header>
+            <div class="kb-amz-item-list-img animate <?php echo getKbAmz()->getOption('imageHoverSwitch') ? 'kb-amz-hover-switch-active' : 'kb-amz-hover-switch-not-active'; ?>">
+                <?php 
+                $images = getKbAmz()->getProductImages($p->ID);
+                ?>
+                <a href="<?php echo get_permalink($p->ID); ?>" title="<?php echo $title; ?>">
+                    <?php
+                    echo $images->getFirst(getKbAmz()->getOption('productListImageSize'), null, array('class' => 'animate kb-amz-first'));
+                    echo $images->getSecond(getKbAmz()->getOption('productListImageSize'),null, array('class' => 'animate kb-amz-second'));
+                    ?>
+                </a>
+                <?php if ($this->featured) : ?>
+                <div class="kb-amz-featured-content">
+                    <?php
+                    if (!empty($p->post_excerpt)) {
+                        echo $p->post_excerpt;
+                    } else {
+                        $content = getKbAmz()->getProductContent($p->ID);
+                        echo getKbAmzExcerptFromContent($content, $this->featured_content_length);
+                    }
+                    ?>
+                </div>
+                <?php endif; ?>
+                <?php echo getKbAmz()->getProductSticker($p->ID); ?>
+                <?php
+                if ($variantLabel = getKbAmz()->getProductVariantLabel($p->ID)) {
+                    echo sprintf(
+                        '<span class="kb-amz-item-list-variant-label">%s</span>',
+                        $variantLabel
+                    );
+                }
+                ?>
+            </div>
+            <div class="kb-amz-item-list-content">
+                <div class="kb-amz-item-list-title">
+
+                    <?php
+                    echo '<a class="kb-amz-item-list-name" href="'.get_permalink($p->ID).'" title="'.$title.'">' .get_the_title($p->ID). '</a>';
+                    ?>
+                </div>
+                <div class="kb-amz-item-actions">
+                    <?php if (getKbAmz()->isProductAvailable($p->ID)): ?>
+                    <div class="kb-amz-item-price">
+                        <?php echo getKbAmz()->getProductPriceHtml($p->ID);?>
+                    </div>
+                    <div class="kb-amz-item-cart-button">
+                        <?php
+                        echo getKbAmz()->getCartButtonHtml($p->ID);
+                        ?>
+                    </div>
+                    <span class="clear"></span>
+                     <?php endif; ?>
+                </div>
+            </div>
+        </header>
+    </article>
+</li>
+
